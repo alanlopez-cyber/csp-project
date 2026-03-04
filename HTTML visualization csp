@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valencia Climate Analysis</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Mono:wght@300;400;500&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ocean:    #0a2540;
+    --deep:     #061929;
+    --surface:  #0e3460;
+    --wave:     #1a6fa8;
+    --foam:     #4fb3d9;
+    --heat:     #f97316;
+    --heatlow:  #fbbf24;
+    --sst:      #38bdf8;
+    --sstglow:  #0ea5e9;
+    --grid:     rgba(255,255,255,0.06);
+    --text:     #e2eef7;
+    --muted:    #7ba5c0;
+    --card:     rgba(255,255,255,0.04);
+    --border:   rgba(255,255,255,0.08);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--deep);
+    color: var(--text);
+    font-family: 'Instrument Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* animated ocean background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 80%, rgba(26,111,168,0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 20%, rgba(10,37,64,0.8) 0%, transparent 70%),
+      radial-gradient(ellipse 100% 80% at 50% 100%, rgba(6,25,41,0.9) 0%, transparent 80%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 48px 32px;
+  }
+
+  /* HEADER */
+  header {
+    margin-bottom: 52px;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .tag {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--foam);
+    border: 1px solid rgba(79,179,217,0.3);
+    padding: 4px 12px;
+    border-radius: 2px;
+    margin-bottom: 18px;
+  }
+
+  h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(32px, 5vw, 54px);
+    line-height: 1.1;
+    color: #fff;
+    margin-bottom: 14px;
+  }
+
+  h1 em {
+    font-style: italic;
+    color: var(--foam);
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 560px;
+    line-height: 1.6;
+  }
+
+  /* STAT CARDS */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 40px;
+    animation: fadeUp 0.8s 0.15s ease both;
+  }
+
+  .stat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 18px;
+    transition: border-color 0.2s;
+  }
+
+  .stat:hover { border-color: rgba(79,179,217,0.3); }
+
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .stat-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: #fff;
+    line-height: 1;
+  }
+
+  .stat-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .stat-value.hot  { color: var(--heat); }
+  .stat-value.cold { color: var(--foam); }
+
+  /* MAIN CHART CARD */
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 32px 28px 24px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.8s 0.25s ease both;
+  }
+
+  .chart-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .chart-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+
+  .chart-desc {
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .legend {
+    display: flex;
+    gap: 20px;
+    flex-shrink: 0;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .legend-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* SVG CHART */
+  .chart-wrap {
+    position: relative;
+    width: 100%;
+    overflow: visible;
+  }
+
+  svg text { font-family: 'DM Mono', monospace; }
+
+  .axis-label {
+    font-size: 10px;
+    fill: var(--muted);
+    letter-spacing: 0.05em;
+  }
+
+  .grid-line { stroke: var(--grid); stroke-width: 1; }
+  .zero-line { stroke: rgba(255,255,255,0.12); stroke-width: 1; stroke-dasharray: 4,4; }
+
+  .sst-line {
+    fill: none;
+    stroke: var(--sst);
+    stroke-width: 2.5;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+    filter: drop-shadow(0 0 6px rgba(56,189,248,0.5));
+  }
+
+  .sst-area {
+    fill: url(#sstGrad);
+    opacity: 0.35;
+  }
+
+  .bar { fill: url(#barGrad); rx: 2; }
+  .bar:hover { fill: var(--heat); cursor: pointer; }
+
+  .dot {
+    fill: var(--sst);
+    stroke: var(--deep);
+    stroke-width: 2;
+    cursor: pointer;
+    transition: r 0.15s;
+  }
+
+  .dot:hover { r: 6; }
+
+  /* TOOLTIP */
+  .tooltip {
+    position: absolute;
+    background: rgba(6,25,41,0.96);
+    border: 1px solid rgba(79,179,217,0.4);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 13px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    min-width: 170px;
+    backdrop-filter: blur(8px);
+    z-index: 10;
+  }
+
+  .tooltip.show { opacity: 1; }
+
+  .tooltip-year {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+
+  .tooltip-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    color: var(--muted);
+    margin-bottom: 3px;
+    font-size: 12px;
+  }
+
+  .tooltip-val { color: #fff; font-weight: 500; }
+
+  /* BOTTOM GRID */
+  .bottom-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    animation: fadeUp 0.8s 0.35s ease both;
+  }
+
+  /* CORRELATION CARD */
+  .corr-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+  }
+
+  .corr-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+
+  .corr-desc {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  .corr-row {
+    margin-bottom: 18px;
+  }
+
+  .corr-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 6px;
+  }
+
+  .corr-name { font-size: 12px; color: var(--muted); }
+
+  .corr-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .corr-bar-track {
+    height: 6px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .corr-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 1s ease;
+  }
+
+  /* ANOMALY CARD */
+  .anomaly-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px;
+  }
+
+  .anomaly-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: #fff;
+    margin-bottom: 6px;
+  }
+
+  .anomaly-desc {
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  .anomaly-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .anomaly-row:last-child { border-bottom: none; }
+
+  .anomaly-year {
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    font-weight: 500;
+    color: #fff;
+    min-width: 42px;
+  }
+
+  .anomaly-tag {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-weight: 600;
+  }
+
+  .tag-high { background: rgba(249,115,22,0.18); color: var(--heat); }
+  .tag-low  { background: rgba(56,189,248,0.15); color: var(--foam); }
+
+  .anomaly-detail {
+    font-size: 12px;
+    color: var(--muted);
+    margin-left: auto;
+    text-align: right;
+  }
+
+  /* FOOTER */
+  footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: gap;
+    animation: fadeUp 0.8s 0.45s ease both;
+  }
+
+  .footer-left {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  .footer-right {
+    font-size: 11px;
+    color: var(--muted);
+    text-align: right;
+    line-height: 1.7;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes drawLine {
+    from { stroke-dashoffset: 2000; }
+    to   { stroke-dashoffset: 0; }
+  }
+
+  .sst-line { stroke-dasharray: 2000; animation: drawLine 2s 0.5s ease both; }
+
+  @media (max-width: 700px) {
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .bottom-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="tag">CS Group 4 Project · Valencia, Spain</div>
+    <h1>Heatwaves & the<br><em>Mediterranean Sea</em></h1>
+    <p class="subtitle">Comparing Valencia August air temperature against Mediterranean Sea Surface Temperature anomalies — 2004 to 2014.</p>
+  </header>
+
+  <div class="stats">
+    <div class="stat">
+      <div class="stat-label">Hottest August</div>
+      <div class="stat-value hot">33.8°C</div>
+      <div class="stat-sub">2010 — 2 heatwave days</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Peak SST Anomaly</div>
+      <div class="stat-value cold">+0.65°C</div>
+      <div class="stat-sub">2014 — highest on record</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Overlap Period</div>
+      <div class="stat-value">11 yrs</div>
+      <div class="stat-sub">2004 – 2014</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Correlation (HW days)</div>
+      <div class="stat-value">−0.33</div>
+      <div class="stat-sub">Weak negative r</div>
+    </div>
+  </div>
+
+  <!-- MAIN CHART -->
+  <div class="chart-card">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">Air Temperature vs SST Anomaly</div>
+        <div class="chart-desc">Bars = max August air temp (°C) &nbsp;·&nbsp; Line = Mediterranean SST anomaly (°C)</div>
+      </div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:var(--heat)"></div>Max Air Temp</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--sst)"></div>SST Anomaly</div>
+      </div>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="tooltip" id="tooltip">
+        <div class="tooltip-year" id="tt-year"></div>
+        <div class="tooltip-row"><span>Max Air</span><span class="tooltip-val" id="tt-air"></span></div>
+        <div class="tooltip-row"><span>Avg Air</span><span class="tooltip-val" id="tt-avg"></span></div>
+        <div class="tooltip-row"><span>SST Anomaly</span><span class="tooltip-val" id="tt-sst"></span></div>
+        <div class="tooltip-row"><span>Heatwave Days</span><span class="tooltip-val" id="tt-hw"></span></div>
+      </div>
+
+      <svg id="mainChart" width="100%" viewBox="0 0 940 320" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <linearGradient id="barGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#f97316" stop-opacity="0.9"/>
+            <stop offset="100%" stop-color="#f97316" stop-opacity="0.2"/>
+          </linearGradient>
+          <linearGradient id="sstGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.6"/>
+            <stop offset="100%" stop-color="#38bdf8" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <!-- chart drawn by JS -->
+      </svg>
+    </div>
+  </div>
+
+  <!-- BOTTOM ROW -->
+  <div class="bottom-grid">
+
+    <!-- CORRELATION -->
+    <div class="corr-card">
+      <div class="corr-title">Pearson Correlation</div>
+      <div class="corr-desc">How strongly does each air temperature variable move with SST anomaly? Calculated across 2004–2014.</div>
+
+      <div class="corr-row">
+        <div class="corr-meta">
+          <span class="corr-name">Max Air Temp vs SST</span>
+          <span class="corr-val" style="color:#94a3b8">r = −0.0166</span>
+        </div>
+        <div class="corr-bar-track">
+          <div class="corr-bar-fill" style="width:1.66%; background:rgba(148,163,184,0.6)"></div>
+        </div>
+      </div>
+
+      <div class="corr-row">
+        <div class="corr-meta">
+          <span class="corr-name">Avg Air Temp vs SST</span>
+          <span class="corr-val" style="color:#fbbf24">r = −0.2433</span>
+        </div>
+        <div class="corr-bar-track">
+          <div class="corr-bar-fill" style="width:24.33%; background:rgba(251,191,36,0.6)"></div>
+        </div>
+      </div>
+
+      <div class="corr-row">
+        <div class="corr-meta">
+          <span class="corr-name">Heatwave Days vs SST</span>
+          <span class="corr-val" style="color:#f97316">r = −0.3293</span>
+        </div>
+        <div class="corr-bar-track">
+          <div class="corr-bar-fill" style="width:32.93%; background:rgba(249,115,22,0.7)"></div>
+        </div>
+      </div>
+
+      <p style="margin-top:20px; font-size:12px; color:var(--muted); line-height:1.6; border-top:1px solid var(--border); padding-top:16px;">
+        All correlations are weak and negative — SST rose steadily through long-term oceanic warming, largely independent of individual summer heatwaves.
+      </p>
+    </div>
+
+    <!-- ANOMALIES -->
+    <div class="anomaly-card">
+      <div class="anomaly-title">Anomaly Detection</div>
+      <div class="anomaly-desc">Years flagged as statistically extreme (beyond mean ± 1.5 standard deviations) in each dataset.</div>
+
+      <div class="anomaly-row">
+        <div class="anomaly-year">2005</div>
+        <div class="anomaly-tag tag-low">SST LOW ▼</div>
+        <div class="anomaly-detail">−0.1205°C<br>unusually cold ocean</div>
+      </div>
+      <div class="anomaly-row">
+        <div class="anomaly-year">2010</div>
+        <div class="anomaly-tag tag-high">AIR HIGH ▲</div>
+        <div class="anomaly-detail">33.8°C max<br>hottest air in period</div>
+      </div>
+      <div class="anomaly-row">
+        <div class="anomaly-year">2004</div>
+        <div class="anomaly-tag tag-high">HW HIGH ▲</div>
+        <div class="anomaly-detail">4 heatwave days<br>most in overlap years</div>
+      </div>
+      <div class="anomaly-row">
+        <div class="anomaly-year">2014</div>
+        <div class="anomaly-tag tag-high">SST HIGH ▲</div>
+        <div class="anomaly-detail">+0.6495°C<br>highest SST anomaly</div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <div class="footer-left">
+      Dataset 1: EEA Annual Average Sea Surface Temperature (Mediterranean) · 145 records 1870–2014<br>
+      Dataset 2: RVVCCA Valencia Air Quality Network · 19 records 2004–2022
+    </div>
+    <div class="footer-right">
+      Algorithms: Bubble Sort · Binary Search<br>
+      Pearson Correlation · Moving Average · Anomaly Detection
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  // ── DATA ────────────────────────────────────────────────────
+  const data = [
+    { year:2004, max:31.2, avg:28.02, hw:4,  sst:-0.0505 },
+    { year:2005, max:28.2, avg:26.20, hw:0,  sst:-0.1205 },
+    { year:2006, max:29.3, avg:26.66, hw:0,  sst: 0.0695 },
+    { year:2007, max:31.3, avg:26.03, hw:1,  sst: 0.0995 },
+    { year:2008, max:32.4, avg:27.14, hw:1,  sst: 0.1595 },
+    { year:2009, max:28.3, avg:27.37, hw:0,  sst: 0.2895 },
+    { year:2010, max:33.8, avg:27.37, hw:2,  sst: 0.3395 },
+    { year:2011, max:30.2, avg:27.37, hw:1,  sst: 0.2495 },
+    { year:2012, max:30.0, avg:27.33, hw:1,  sst: 0.3495 },
+    { year:2013, max:27.6, avg:25.43, hw:0,  sst: 0.4095 },
+    { year:2014, max:29.9, avg:26.04, hw:0,  sst: 0.6495 },
+  ];
+
+  // ── CHART SETUP ─────────────────────────────────────────────
+  const svg    = document.getElementById('mainChart');
+  const W = 940, H = 320;
+  const pad    = { top:20, right:60, bottom:44, left:52 };
+  const chartW = W - pad.left - pad.right;
+  const chartH = H - pad.top  - pad.bottom;
+
+  const n      = data.length;
+  const barW   = chartW / n;
+  const barGap = barW * 0.22;
+
+  // scales
+  const airMin = 24, airMax = 36;
+  const sstMin = -0.25, sstMax = 0.75;
+
+  function xPos(i)    { return pad.left + i * barW + barW / 2; }
+  function airY(v)    { return pad.top + chartH - ((v - airMin) / (airMax - airMin)) * chartH; }
+  function sstY(v)    { return pad.top + chartH - ((v - sstMin) / (sstMax - sstMin)) * chartH; }
+
+  function el(tag, attrs={}, parent) {
+    const e = document.createElementNS('http://www.w3.org/2000/svg', tag);
+    for (const [k,v] of Object.entries(attrs)) e.setAttribute(k,v);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+
+  // ── GRID LINES ───────────────────────────────────────────────
+  // air temp grid
+  [24,26,28,30,32,34,36].forEach(v => {
+    const y = airY(v);
+    el('line', { x1:pad.left, y1:y, x2:pad.left+chartW, y2:y,
+      stroke: v===0?'rgba(255,255,255,0.12)':'rgba(255,255,255,0.05)',
+      'stroke-width':1, 'stroke-dasharray': v===0?'4,4':'none' }, svg);
+    el('text', { x:pad.left-6, y:y+4, 'text-anchor':'end',
+      fill:'rgba(123,165,192,0.7)', 'font-size':'9', 'font-family':'DM Mono,monospace' }, svg)
+      .textContent = v+'°';
+  });
+
+  // SST zero line
+  const zeroY = sstY(0);
+  el('line', { x1:pad.left, y1:zeroY, x2:pad.left+chartW, y2:zeroY,
+    stroke:'rgba(56,189,248,0.2)', 'stroke-width':1, 'stroke-dasharray':'4,4' }, svg);
+
+  // ── SST AREA ─────────────────────────────────────────────────
+  const areaPoints = data.map((d,i) => `${xPos(i)},${sstY(d.sst)}`).join(' ');
+  const firstX = xPos(0), lastX = xPos(n-1);
+  const areaPath = `M${firstX},${sstY(0)} ` +
+    data.map((d,i) => `L${xPos(i)},${sstY(d.sst)}`).join(' ') +
+    ` L${lastX},${sstY(0)} Z`;
+  el('path', { d:areaPath, fill:'url(#sstGrad)', opacity:'0.4' }, svg);
+
+  // ── BARS ──────────────────────────────────────────────────────
+  const barEls = [];
+  data.forEach((d, i) => {
+    const x = pad.left + i * barW + barGap;
+    const bw = barW - barGap * 2;
+    const y  = airY(d.max);
+    const bh = chartH - (y - pad.top);
+    const rect = el('rect', {
+      x, y, width:bw, height:bh,
+      fill:'url(#barGrad)', rx:'3', opacity:'0.85',
+      style:'cursor:pointer; transition: opacity 0.15s'
+    }, svg);
+    barEls.push(rect);
+    rect.addEventListener('mouseenter', e => showTip(e, d, i));
+    rect.addEventListener('mouseleave', hideTip);
+  });
+
+  // ── SST LINE ─────────────────────────────────────────────────
+  const linePts = data.map((d,i) => `${xPos(i)},${sstY(d.sst)}`).join(' ');
+  el('polyline', { points:linePts,
+    fill:'none', stroke:'#38bdf8', 'stroke-width':'2.5',
+    'stroke-linejoin':'round', 'stroke-linecap':'round',
+    filter:'url(#glow)',
+    'stroke-dasharray':'2000', 'stroke-dashoffset':'2000',
+    style:'animation: drawLine 2s 0.5s ease both'
+  }, svg);
+
+  // glow filter
+  const defs = el('defs', {}, svg);
+  const filter = el('filter', { id:'glow', x:'-20%', y:'-20%', width:'140%', height:'140%' }, defs);
+  const blur = el('feGaussianBlur', { stdDeviation:'3', result:'blur' }, filter);
+  const merge = el('feMerge', {}, filter);
+  el('feMergeNode', { in:'blur' }, merge);
+  el('feMergeNode', { in:'SourceGraphic' }, merge);
+
+  // ── DOT POINTS ───────────────────────────────────────────────
+  data.forEach((d, i) => {
+    const cx = xPos(i), cy = sstY(d.sst);
+    const dot = el('circle', { cx, cy, r:'4',
+      fill:'#38bdf8', stroke:'#061929', 'stroke-width':'2',
+      style:'cursor:pointer; transition: r 0.15s'
+    }, svg);
+    dot.addEventListener('mouseenter', e => { dot.setAttribute('r','6'); showTip(e,d,i); });
+    dot.addEventListener('mouseleave', e => { dot.setAttribute('r','4'); hideTip(); });
+  });
+
+  // ── X AXIS LABELS ────────────────────────────────────────────
+  data.forEach((d, i) => {
+    const x = xPos(i);
+    const lbl = el('text', { x, y: pad.top+chartH+18, 'text-anchor':'middle',
+      fill:'rgba(123,165,192,0.8)', 'font-size':'10', 'font-family':'DM Mono,monospace'
+    }, svg);
+    lbl.textContent = d.year;
+  });
+
+  // ── SST RIGHT AXIS ───────────────────────────────────────────
+  [-0.2, 0, 0.2, 0.4, 0.6].forEach(v => {
+    const y = sstY(v);
+    const lbl = el('text', { x: pad.left+chartW+8, y: y+4, 'text-anchor':'start',
+      fill:'rgba(56,189,248,0.7)', 'font-size':'9', 'font-family':'DM Mono,monospace'
+    }, svg);
+    lbl.textContent = (v>=0?'+':'')+v.toFixed(1)+'°';
+  });
+
+  // axis labels
+  const airLbl = el('text', { x:10, y:pad.top+chartH/2, 'text-anchor':'middle',
+    fill:'rgba(249,115,22,0.7)', 'font-size':'9', 'font-family':'DM Mono,monospace',
+    transform:`rotate(-90, 10, ${pad.top+chartH/2})`
+  }, svg);
+  airLbl.textContent = 'AIR TEMP (°C)';
+
+  const sstLbl = el('text', { x:W-8, y:pad.top+chartH/2, 'text-anchor':'middle',
+    fill:'rgba(56,189,248,0.7)', 'font-size':'9', 'font-family':'DM Mono,monospace',
+    transform:`rotate(90, ${W-8}, ${pad.top+chartH/2})`
+  }, svg);
+  sstLbl.textContent = 'SST ANOMALY (°C)';
+
+  // ── TOOLTIP ──────────────────────────────────────────────────
+  const tip    = document.getElementById('tooltip');
+  const ttYear = document.getElementById('tt-year');
+  const ttAir  = document.getElementById('tt-air');
+  const ttAvg  = document.getElementById('tt-avg');
+  const ttSst  = document.getElementById('tt-sst');
+  const ttHw   = document.getElementById('tt-hw');
+
+  function showTip(e, d, i) {
+    ttYear.textContent = d.year;
+    ttAir.textContent  = d.max + '°C';
+    ttAvg.textContent  = d.avg + '°C';
+    ttSst.textContent  = (d.sst >= 0 ? '+' : '') + d.sst.toFixed(4) + '°C';
+    ttHw.textContent   = d.hw + ' day' + (d.hw !== 1 ? 's' : '');
+    const wrap = document.querySelector('.chart-wrap');
+    const rect = wrap.getBoundingClientRect();
+    const me   = e.target.getBoundingClientRect();
+    let left   = me.left - rect.left + me.width / 2 - 85;
+    let top    = me.top  - rect.top  - 130;
+    if (left < 0) left = 0;
+    tip.style.left = left + 'px';
+    tip.style.top  = top  + 'px';
+    tip.classList.add('show');
+  }
+
+  function hideTip() { tip.classList.remove('show'); }
+
+  // inject keyframe for line animation
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes drawLine {
+      from { stroke-dashoffset: 2000; }
+      to   { stroke-dashoffset: 0; }
+    }
+  `;
+  document.head.appendChild(style);
+</script>
+</body>
+</html>
