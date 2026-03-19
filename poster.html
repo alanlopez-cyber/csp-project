@@ -3,395 +3,932 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Valencia Climate Poster — QR Code</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<title>Valencia Climate Poster — Group 4</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ── RESET & BASE ─────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-  :root {
-    --ink:    #0a0f1e;
-    --deep:   #0d1b35;
-    --blue:   #1a7fd4;
-    --sky:    #4fb3f0;
-    --orange: #e8621a;
-    --peach:  #f4956a;
-    --cream:  #f5f0e8;
-    --muted:  #8aaccc;
-    --serif:  'DM Serif Display', serif;
-    --sans:   'DM Sans', sans-serif;
-    --mono:   'JetBrains Mono', monospace;
-  }
+:root {
+  --ink:     #0a0f1e;
+  --deep:    #0d1b35;
+  --mid:     #112244;
+  --ocean:   #0e3a6b;
+  --blue:    #1a7fd4;
+  --sky:     #4fb3f0;
+  --foam:    #a8d8f5;
+  --orange:  #e8621a;
+  --peach:   #f4956a;
+  --cream:   #f5f0e8;
+  --white:   #ffffff;
+  --muted:   #8aaccc;
+  --grid:    rgba(74,179,240,0.1);
+  --serif:   'DM Serif Display', Georgia, serif;
+  --sans:    'DM Sans', sans-serif;
+  --mono:    'JetBrains Mono', monospace;
+  --radius:  10px;
+}
 
-  body {
-    background: var(--ink);
-    font-family: var(--sans);
-    color: var(--cream);
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 40px 20px;
-  }
+html { font-size: 14px; }
 
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background:
-      radial-gradient(ellipse 80% 60% at 20% 80%, rgba(14,58,107,0.4) 0%, transparent 70%),
-      radial-gradient(ellipse 60% 60% at 80% 20%, rgba(79,179,240,0.1) 0%, transparent 60%);
-    pointer-events: none;
-    z-index: 0;
-  }
+body {
+  background: var(--ink);
+  color: var(--cream);
+  font-family: var(--sans);
+  min-height: 100vh;
+  /* poster wrapper */
+}
 
-  body::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: radial-gradient(circle, rgba(74,179,240,0.08) 1px, transparent 1px);
-    background-size: 28px 28px;
-    pointer-events: none;
-    z-index: 0;
-  }
+/* ── POSTER SHELL ─────────────────────────────────────────── */
+.poster {
+  width: 1200px;
+  margin: 0 auto;
+  padding: 0;
+  background:
+    radial-gradient(ellipse 120% 60% at 50% 0%,   rgba(14,58,107,0.55) 0%, transparent 65%),
+    radial-gradient(ellipse 80%  80% at 100% 100%, rgba(26,127,212,0.15) 0%, transparent 60%),
+    var(--ink);
+  position: relative;
+  overflow: hidden;
+}
 
-  .card {
-    position: relative;
-    z-index: 1;
-    background: rgba(13,27,53,0.85);
-    border: 1px solid rgba(79,179,240,0.2);
-    border-radius: 20px;
-    padding: 44px 48px;
-    max-width: 480px;
-    width: 100%;
-    text-align: center;
-    backdrop-filter: blur(12px);
-    box-shadow: 0 0 60px rgba(14,58,107,0.5), 0 0 0 1px rgba(79,179,240,0.08);
-  }
+/* subtle dot-grid texture */
+.poster::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle, rgba(74,179,240,0.12) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  z-index: 0;
+}
 
-  /* top accent bar */
-  .card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, var(--orange), var(--peach), var(--blue), var(--sky));
-    border-radius: 20px 20px 0 0;
-  }
+/* wave decoration top */
+.poster::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 6px;
+  background: linear-gradient(90deg,
+    var(--orange) 0%, var(--peach) 20%,
+    var(--blue) 40%, var(--sky) 60%,
+    var(--blue) 80%, var(--orange) 100%
+  );
+  z-index: 10;
+}
 
-  .badge {
-    display: inline-block;
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--orange);
-    border: 1px solid rgba(232,98,26,0.35);
-    padding: 5px 16px;
-    border-radius: 20px;
-    background: rgba(232,98,26,0.07);
-    margin-bottom: 20px;
-  }
+.poster > * { position: relative; z-index: 1; }
 
-  h1 {
-    font-family: var(--serif);
-    font-size: 22px;
-    line-height: 1.3;
-    color: var(--cream);
-    margin-bottom: 6px;
-  }
+/* ── HEADER ──────────────────────────────────────────────── */
+.poster-header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 20px;
+  padding: 36px 44px 28px;
+  border-bottom: 1px solid rgba(74,179,240,0.2);
+}
 
-  h1 em { color: var(--sky); font-style: italic; }
+.header-left { font-size: 12px; color: var(--muted); line-height: 1.8; font-family: var(--mono); }
+.header-left strong { color: var(--sky); display: block; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
 
-  .subtitle {
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 32px;
-    line-height: 1.5;
-  }
+.header-center { text-align: center; }
 
-  /* QR container */
-  .qr-frame {
-    display: inline-block;
-    padding: 14px;
-    background: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 0 30px rgba(79,179,240,0.25);
-    margin-bottom: 28px;
-    position: relative;
-  }
+.rq-label {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--orange);
+  border: 1px solid rgba(232,98,26,0.4);
+  padding: 4px 16px;
+  border-radius: 20px;
+  margin-bottom: 14px;
+  background: rgba(232,98,26,0.06);
+}
 
-  /* corner accents */
-  .qr-frame::before, .qr-frame::after {
-    content: '';
-    position: absolute;
-    width: 20px; height: 20px;
-    border-color: var(--orange);
-    border-style: solid;
-  }
-  .qr-frame::before { top: -1px; left: -1px; border-width: 3px 0 0 3px; border-radius: 4px 0 0 0; }
-  .qr-frame::after  { bottom: -1px; right: -1px; border-width: 0 3px 3px 0; border-radius: 0 0 4px 0; }
+.poster-title {
+  font-family: var(--serif);
+  font-size: 26px;
+  line-height: 1.25;
+  color: var(--white);
+  max-width: 520px;
+  margin: 0 auto;
+}
 
-  #qrcode { display: block; }
-  #qrcode img, #qrcode canvas { display: block; border-radius: 4px; }
+.poster-title em {
+  color: var(--sky);
+  font-style: italic;
+}
 
-  .url-box {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(79,179,240,0.18);
-    border-radius: 10px;
-    padding: 12px 16px;
-    margin-bottom: 24px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
+.header-right { text-align: right; font-size: 12px; color: var(--muted); line-height: 1.8; font-family: var(--mono); }
+.header-right strong { color: var(--peach); display: block; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
 
-  .url-icon { font-size: 16px; flex-shrink: 0; }
+/* ── FINDING STRIP ───────────────────────────────────────── */
+.finding-strip {
+  display: flex;
+  gap: 0;
+  background: rgba(14,58,107,0.5);
+  border-top: 1px solid rgba(74,179,240,0.15);
+  border-bottom: 1px solid rgba(74,179,240,0.15);
+  padding: 0 44px;
+}
 
-  .url-text {
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--sky);
-    word-break: break-all;
-    text-align: left;
-    line-height: 1.5;
-  }
+.finding-pill {
+  flex: 1;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  border-right: 1px solid rgba(74,179,240,0.12);
+}
+.finding-pill:last-child { border-right: none; }
 
-  .url-label {
-    font-size: 10px;
-    color: var(--muted);
-    text-align: left;
-    display: block;
-    margin-bottom: 2px;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
+.fp-num { font-family: var(--serif); font-size: 30px; font-weight: normal; }
+.fp-num.orange { color: var(--orange); }
+.fp-num.sky    { color: var(--sky);    }
+.fp-num.foam   { color: var(--foam);   }
+.fp-num.muted  { color: var(--muted);  }
 
-  .instructions {
-    font-size: 12px;
-    color: var(--muted);
-    line-height: 1.7;
-    margin-bottom: 28px;
-    text-align: left;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(79,179,240,0.1);
-    border-radius: 10px;
-    padding: 14px 16px;
-  }
+.fp-text { font-size: 11.5px; color: var(--muted); line-height: 1.4; }
+.fp-text strong { color: var(--cream); font-size: 12px; display: block; }
 
-  .instructions strong { color: var(--cream); }
+/* ── MAIN BODY ───────────────────────────────────────────── */
+.poster-body {
+  display: grid;
+  grid-template-columns: 280px 1fr 280px;
+  gap: 0;
+  min-height: 900px;
+}
 
-  .instructions ol { padding-left: 16px; }
-  .instructions li { margin-bottom: 4px; }
+/* ── LEFT COLUMN ─────────────────────────────────────────── */
+.col-left {
+  padding: 28px 24px;
+  border-right: 1px solid rgba(74,179,240,0.14);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
 
-  .step-label {
-    font-family: var(--mono);
-    font-size: 9px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 8px;
-    display: block;
-  }
+/* ── CENTRE COLUMN ───────────────────────────────────────── */
+.col-centre {
+  padding: 28px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
 
-  /* URL editor */
-  .url-editor {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 20px;
-  }
+/* ── RIGHT COLUMN ────────────────────────────────────────── */
+.col-right {
+  padding: 28px 24px;
+  border-left: 1px solid rgba(74,179,240,0.14);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
 
-  .url-editor input {
-    flex: 1;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(79,179,240,0.25);
-    border-radius: 8px;
-    padding: 9px 12px;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--cream);
-    outline: none;
-    transition: border-color 0.2s;
-  }
+/* ── SECTION BLOCKS ──────────────────────────────────────── */
+.section {
+  background: rgba(13,27,53,0.7);
+  border: 1px solid rgba(74,179,240,0.14);
+  border-radius: var(--radius);
+  padding: 18px;
+  position: relative;
+  overflow: hidden;
+}
 
-  .url-editor input:focus { border-color: var(--sky); }
-  .url-editor input::placeholder { color: var(--muted); }
+.section::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 3px; height: 100%;
+  background: linear-gradient(180deg, var(--orange), transparent);
+}
 
-  .url-editor button {
-    background: var(--blue);
-    border: none;
-    border-radius: 8px;
-    padding: 9px 16px;
-    color: white;
-    font-family: var(--mono);
-    font-size: 11px;
-    cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
-    white-space: nowrap;
-  }
+.section.blue-accent::before {
+  background: linear-gradient(180deg, var(--sky), transparent);
+}
 
-  .url-editor button:hover  { background: var(--sky); }
-  .url-editor button:active { transform: scale(0.97); }
+.section.teal-accent::before {
+  background: linear-gradient(180deg, #22d3ee, transparent);
+}
 
-  .team {
-    font-size: 11px;
-    color: rgba(138,172,204,0.5);
-    font-family: var(--mono);
-    line-height: 1.7;
-  }
+.section.green-accent::before {
+  background: linear-gradient(180deg, #4ade80, transparent);
+}
 
-  .team strong { color: var(--muted); display: block; margin-bottom: 2px; }
+.sec-label {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: var(--orange);
+  margin-bottom: 7px;
+}
 
-  /* download btn */
-  .dl-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(232,98,26,0.12);
-    border: 1px solid rgba(232,98,26,0.35);
-    color: var(--peach);
-    font-family: var(--mono);
-    font-size: 11px;
-    padding: 10px 20px;
-    border-radius: 9px;
-    cursor: pointer;
-    margin-bottom: 28px;
-    transition: background 0.2s;
-    text-decoration: none;
-  }
+.section.blue-accent  .sec-label { color: var(--sky);   }
+.section.teal-accent  .sec-label { color: #22d3ee;       }
+.section.green-accent .sec-label { color: #4ade80;       }
 
-  .dl-btn:hover { background: rgba(232,98,26,0.22); }
+.sec-title {
+  font-family: var(--serif);
+  font-size: 15px;
+  color: var(--white);
+  margin-bottom: 10px;
+  line-height: 1.25;
+}
+
+.sec-body {
+  font-size: 11.5px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.sec-body p + p { margin-top: 8px; }
+
+.sec-body strong { color: var(--cream); }
+
+/* ── HYPOTHESIS BOX ──────────────────────────────────────── */
+.hypothesis-box {
+  background: rgba(232,98,26,0.08);
+  border: 1px solid rgba(232,98,26,0.3);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 11.5px;
+  color: var(--peach);
+  font-style: italic;
+  line-height: 1.55;
+  margin-top: 10px;
+}
+
+/* ── CONCLUSION BOX ──────────────────────────────────────── */
+.conclusion-box {
+  background: rgba(26,127,212,0.08);
+  border: 1px solid rgba(26,127,212,0.3);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 11.5px;
+  color: var(--foam);
+  line-height: 1.55;
+  margin-top: 10px;
+}
+
+/* ── RESULT BADGES ───────────────────────────────────────── */
+.result-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.result-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 11px;
+  border-radius: 7px;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(74,179,240,0.1);
+}
+
+.ri-icon {
+  font-size: 16px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.ri-text { font-size: 11px; color: var(--muted); line-height: 1.45; }
+.ri-text strong { color: var(--cream); }
+
+/* ── CHART BOXES ─────────────────────────────────────────── */
+.chart-box { position: relative; width: 100%; }
+.chart-box canvas { width: 100% !important; }
+
+/* ── PEARSON BARS ────────────────────────────────────────── */
+.pearson-list { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+
+.p-row { }
+.p-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
+.p-label  { font-size: 11px; color: var(--muted); }
+.p-val    { font-family: var(--mono); font-size: 11px; color: var(--sky); }
+.p-track  { height: 7px; background: rgba(255,255,255,0.06); border-radius: 4px; position: relative; overflow: hidden; }
+.p-fill   { height: 100%; border-radius: 4px; position: absolute; right: 0; animation: fillBar 1.8s cubic-bezier(0.16,1,0.3,1) forwards; }
+.p-fill.f1 { background: linear-gradient(90deg, var(--sky), #22d3ee);   animation-delay: 0.4s; }
+.p-fill.f2 { background: linear-gradient(90deg, var(--blue), var(--sky)); animation-delay: 0.6s; }
+.p-fill.f3 { background: linear-gradient(90deg, var(--orange), var(--blue)); animation-delay: 0.8s; }
+.p-interp { font-size: 10px; color: rgba(138,172,204,0.7); margin-top: 3px; font-family: var(--mono); }
+
+@keyframes fillBar { from { width: 0; } }
+
+/* ── DATA TABLE ──────────────────────────────────────────── */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10.5px;
+  margin-top: 10px;
+}
+
+.data-table th {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 6px 8px;
+  text-align: center;
+  border-bottom: 1px solid rgba(74,179,240,0.2);
+}
+
+.data-table td {
+  padding: 5px 8px;
+  text-align: center;
+  color: var(--muted);
+  border-bottom: 1px solid rgba(74,179,240,0.06);
+  font-family: var(--mono);
+  font-size: 10px;
+}
+
+.data-table tr:hover td { background: rgba(74,179,240,0.05); color: var(--cream); }
+.data-table td.sst-pos  { color: var(--orange); }
+.data-table td.sst-neg  { color: var(--sky); }
+.data-table td.air-hi   { color: var(--peach); }
+.data-table td.hw-hi    { color: #4ade80; }
+.data-table .yr         { color: var(--cream); font-weight: 600; }
+
+/* ── IMPLICATION CARDS ───────────────────────────────────── */
+.impl-card {
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid rgba(74,179,240,0.1);
+  margin-top: 8px;
+  align-items: flex-start;
+}
+
+.impl-icon { font-size: 18px; flex-shrink: 0; }
+.impl-text { font-size: 11px; color: var(--muted); line-height: 1.5; }
+.impl-text strong { color: var(--cream); display: block; margin-bottom: 2px; font-size: 11.5px; }
+
+/* ── LIMITATION TAGS ─────────────────────────────────────── */
+.limit-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 11px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.limit-item:last-child { margin-bottom: 0; }
+.lim-tag {
+  flex-shrink: 0;
+  font-family: var(--mono);
+  font-size: 9px;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: rgba(232,98,26,0.15);
+  color: var(--peach);
+  letter-spacing: 1px;
+  margin-top: 2px;
+}
+
+/* ── METHOD STEPS ────────────────────────────────────────── */
+.method-step {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 9px;
+  align-items: flex-start;
+}
+.method-step:last-child { margin-bottom: 0; }
+.ms-num {
+  flex-shrink: 0;
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  background: var(--ocean);
+  border: 1px solid rgba(74,179,240,0.4);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--sky);
+}
+.ms-text { font-size: 11px; color: var(--muted); line-height: 1.5; }
+.ms-text strong { color: var(--cream); }
+
+/* ── DIVIDER ─────────────────────────────────────────────── */
+.divider {
+  height: 1px;
+  background: rgba(74,179,240,0.12);
+  margin: 4px 0;
+}
+
+/* ── FOOTER ──────────────────────────────────────────────── */
+.poster-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 44px;
+  border-top: 1px solid rgba(74,179,240,0.15);
+  background: rgba(13,27,53,0.4);
+  font-size: 10px;
+  font-family: var(--mono);
+  color: rgba(138,172,204,0.6);
+}
+
+.footer-sources { display: flex; flex-direction: column; gap: 2px; }
+.footer-sources a { color: var(--sky); text-decoration: none; }
+.footer-right { text-align: right; }
+
+/* ── DECADE MINI-BARS ────────────────────────────────────── */
+.decade-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 10px;
+}
+
+.dg-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.dg-label {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--muted);
+  width: 36px;
+  flex-shrink: 0;
+}
+
+.dg-track {
+  flex: 1;
+  height: 8px;
+  background: rgba(255,255,255,0.05);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.dg-bar {
+  height: 100%;
+  border-radius: 4px;
+}
+
+.dg-val {
+  font-family: var(--mono);
+  font-size: 9px;
+  width: 55px;
+  flex-shrink: 0;
+  text-align: right;
+}
+
+/* ── PRINT ───────────────────────────────────────────────── */
+@media print {
+  body { background: white; }
+  .poster { width: 100%; }
+}
 </style>
 </head>
 <body>
+<div class="poster">
 
-<div class="card">
-  <div class="badge">IB Group 4 Project</div>
+  <!-- ══ HEADER ══════════════════════════════════════════════ -->
+  <header class="poster-header">
 
-  <h1>Valencia Climate Poster<br><em>Scan to View</em></h1>
-  <p class="subtitle">Mediterranean SST vs August Air Temperature · 2004–2014</p>
+    <div class="header-left">
+      <strong>IB Group 4 Project</strong>
+      Computer Science · ESS<br>
+      Biology · Chemistry · Physics<br>
+      <br>
+      <strong>Team</strong>
+      Alan Lopez Dominguez<br>
+      Sol Nackowiz &nbsp;·&nbsp; Aitana Morzan<br>
+      Lilou Gebhart &nbsp;·&nbsp; Lucas Garcia Ferrer
+    </div>
 
-  <div class="qr-frame">
-    <div id="qrcode"></div>
-  </div>
+    <div class="header-center">
+      <div class="rq-label">Research Question</div>
+      <h1 class="poster-title">
+        To what extent do heatwaves impact<br>
+        <em>ocean temperatures</em> and water plants<br>
+        in the Mediterranean?
+      </h1>
+    </div>
 
-  <br>
+    <div class="header-right">
+      <strong>Data Sources</strong>
+      EEA SST Dataset<br>
+      1870 – 2014 · 145 records<br>
+      <br>
+      <strong>RVVCCA Valencia</strong>
+      Daily air quality &amp; temp<br>
+      2004 – 2022 · August filtered
+    </div>
 
-  <span class="step-label">🔗 Pointing to</span>
-  <div class="url-box">
-    <span class="url-icon">🌐</span>
-    <div>
-      <span class="url-label">Current URL</span>
-      <div class="url-text" id="urlDisplay">https://alanlopez-cyber.github.io/csp-project/valencia_climate_poster.html</div>
+  </header>
+
+  <!-- ══ FINDINGS STRIP ════════════════════════════════════════ -->
+  <div class="finding-strip">
+    <div class="finding-pill">
+      <div class="fp-num sky">+0.70°C</div>
+      <div class="fp-text"><strong>SST Rise 2004→2014</strong>Steady, consistent Mediterranean warming over the overlap period</div>
+    </div>
+    <div class="finding-pill">
+      <div class="fp-num orange">No trend</div>
+      <div class="fp-text"><strong>Air Temp (August)</strong>Oscillates independently — net change −0.7°C over same period</div>
+    </div>
+    <div class="finding-pill">
+      <div class="fp-num foam">r = −0.33</div>
+      <div class="fp-text"><strong>Strongest Pearson r</strong>Heatwave days × SST anomaly — moderate negative, not positive</div>
+    </div>
+    <div class="finding-pill">
+      <div class="fp-num muted">+0.94°C</div>
+      <div class="fp-text"><strong>SST Change 1870s→2010s</strong>Long-term warming confirmed across 145 years of EEA records</div>
     </div>
   </div>
 
-  <span class="step-label">✏️ Update URL once poster is hosted</span>
-  <div class="url-editor">
-    <input type="text" id="urlInput" placeholder="Paste your hosted URL here…" value="https://alanlopez-cyber.github.io/csp-project/valencia_climate_poster.html">
-    <button onclick="updateQR()">Update QR</button>
+  <!-- ══ BODY ═════════════════════════════════════════════════ -->
+  <div class="poster-body">
+
+    <!-- ── LEFT ─────────────────────────────────────────────── -->
+    <div class="col-left">
+
+      <!-- Introduction -->
+      <div class="section">
+        <div class="sec-label">01 · Background</div>
+        <div class="sec-title">Why Valencia & the Mediterranean?</div>
+        <div class="sec-body">
+          <p>Valencia, on the western Mediterranean coast, has recorded increasing August temperatures exceeding <strong>34°C</strong> over the past two decades. Simultaneously, EEA records show rising Mediterranean Sea Surface Temperatures (SST).</p>
+          <p>The Mediterranean is warming <strong>20% faster</strong> than the global ocean average (IPCC AR6), making it a critical early-warning system for global ocean health.</p>
+          <p>Marine ecosystems here — especially <em>Posidonia oceanica</em> seagrass meadows — are highly sensitive to temperature increase and provide oxygen, carbon sequestration, and fish nursery habitat.</p>
+        </div>
+
+        <div class="hypothesis-box">
+          <strong style="color:var(--orange); display:block; margin-bottom:4px; font-style:normal; font-family:var(--mono); font-size:9.5px; letter-spacing:1.5px; text-transform:uppercase;">Hypothesis</strong>
+          Years with higher August air temperatures would produce more heatwave days, and this would correlate positively with higher Mediterranean SST anomalies in the same year.
+        </div>
+      </div>
+
+      <!-- Method -->
+      <div class="section blue-accent">
+        <div class="sec-label">02 · Methodology</div>
+        <div class="sec-title">Scientific Approach</div>
+        <div class="sec-body">
+          <div class="method-step">
+            <div class="ms-num">1</div>
+            <div class="ms-text"><strong>Data extraction —</strong> EEA Mediterranean SST (Mediterranean Sea column, Yearly means) parsed via Python <span style="font-family:var(--mono);font-size:10px;">csv.DictReader</span></div>
+          </div>
+          <div class="method-step">
+            <div class="ms-num">2</div>
+            <div class="ms-text"><strong>Air temp filter —</strong> RVVCCA daily records filtered to August only; max, mean, and heatwave days (≥30°C threshold) calculated per year</div>
+          </div>
+          <div class="method-step">
+            <div class="ms-num">3</div>
+            <div class="ms-text"><strong>Overlap analysis —</strong> 11-year window 2004–2014 where both datasets share records used for correlation</div>
+          </div>
+          <div class="method-step">
+            <div class="ms-num">4</div>
+            <div class="ms-text"><strong>Decade means —</strong> SST and air temp grouped by decade using <span style="font-family:var(--mono);font-size:10px;">defaultdict</span> for long-term trend analysis</div>
+          </div>
+          <div class="method-step">
+            <div class="ms-num">5</div>
+            <div class="ms-text"><strong>Pearson r —</strong> Three correlation coefficients computed: max air × SST, avg air × SST, heatwave days × SST</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Limitations -->
+      <div class="section">
+        <div class="sec-label">03 · Limitations</div>
+        <div class="sec-title">Data Constraints</div>
+        <div class="sec-body">
+          <div class="limit-item">
+            <span class="lim-tag">SAMPLE</span>
+            Only 11 years of overlap between datasets — too small for statistically robust conclusions
+          </div>
+          <div class="limit-item">
+            <span class="lim-tag">TEMPORAL</span>
+            SST is an <em>annual</em> average; air temp is <em>August-only</em> — comparing different time resolutions introduces systematic mismatch
+          </div>
+          <div class="limit-item">
+            <span class="lim-tag">RECENCY</span>
+            EEA SST dataset ends 2014 — misses post-2015 extreme heatwave events that might show different patterns
+          </div>
+          <div class="limit-item">
+            <span class="lim-tag">ACCESS</span>
+            Monthly Valencia-specific SST data not publicly available; forces use of basin-wide annual average
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── CENTRE ─────────────────────────────────────────────── -->
+    <div class="col-centre">
+
+      <!-- Key chart: divergence -->
+      <div class="section blue-accent">
+        <div class="sec-label">04 · Core Finding — The Divergence</div>
+        <div class="sec-title">SST Rises Steadily. Air Temperature Does Not Follow.</div>
+        <div class="sec-body" style="margin-bottom:10px;">
+          Both series normalised 0→1 for visual comparison. <span style="color:var(--sky)">Blue = SST anomaly</span> climbs monotonically from −0.05°C (2004) to +0.65°C (2014).
+          <span style="color:var(--orange)">Orange = max August air temp</span> fluctuates with no directional trend.
+        </div>
+        <div class="chart-box" style="height:200px;">
+          <canvas id="divergeChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Data table + dual axis -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+
+        <div class="section teal-accent">
+          <div class="sec-label">05 · Raw Data Table</div>
+          <div class="sec-title">2004–2014 Overlap</div>
+          <table class="data-table">
+            <thead>
+              <tr><th>Year</th><th>Max°C</th><th>Avg°C</th><th>HW</th><th>SST Δ</th></tr>
+            </thead>
+            <tbody>
+              <tr><td class="yr">2004</td><td>31.2</td><td>28.02</td><td class="hw-hi">4</td><td class="sst-neg">−0.051</td></tr>
+              <tr><td class="yr">2005</td><td>28.2</td><td>26.20</td><td>0</td><td class="sst-neg">−0.121</td></tr>
+              <tr><td class="yr">2006</td><td>29.3</td><td>26.66</td><td>0</td><td class="sst-pos">+0.070</td></tr>
+              <tr><td class="yr">2007</td><td>31.3</td><td>26.03</td><td>1</td><td class="sst-pos">+0.100</td></tr>
+              <tr><td class="yr">2008</td><td>32.4</td><td>27.14</td><td>1</td><td class="sst-pos">+0.160</td></tr>
+              <tr><td class="yr">2009</td><td>28.3</td><td>27.37</td><td>0</td><td class="sst-pos">+0.290</td></tr>
+              <tr><td class="yr">2010</td><td class="air-hi">33.8</td><td>27.37</td><td>2</td><td class="sst-pos">+0.340</td></tr>
+              <tr><td class="yr">2011</td><td>30.2</td><td>27.37</td><td>1</td><td class="sst-pos">+0.250</td></tr>
+              <tr><td class="yr">2012</td><td>30.0</td><td>27.33</td><td>1</td><td class="sst-pos">+0.350</td></tr>
+              <tr><td class="yr">2013</td><td>27.6</td><td>25.43</td><td>0</td><td class="sst-pos">+0.410</td></tr>
+              <tr><td class="yr">2014</td><td>29.9</td><td>26.04</td><td>0</td><td class="sst-pos">+0.650</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="section">
+          <div class="sec-label">06 · Pearson Correlation</div>
+          <div class="sec-title">r values vs SST Anomaly</div>
+          <div class="pearson-list">
+            <div class="p-row">
+              <div class="p-header"><span class="p-label">Max Air Temp × SST</span><span class="p-val">r = −0.017</span></div>
+              <div class="p-track"><div class="p-fill f1" style="width:3.3%"></div></div>
+              <div class="p-interp">Negligible — essentially no link</div>
+            </div>
+            <div class="p-row">
+              <div class="p-header"><span class="p-label">Avg Air Temp × SST</span><span class="p-val">r = −0.243</span></div>
+              <div class="p-track"><div class="p-fill f2" style="width:48.7%"></div></div>
+              <div class="p-interp">Weak negative relationship</div>
+            </div>
+            <div class="p-row">
+              <div class="p-header"><span class="p-label">Heatwave Days × SST</span><span class="p-val">r = −0.329</span></div>
+              <div class="p-track"><div class="p-fill f3" style="width:65.9%"></div></div>
+              <div class="p-interp">Moderate negative — strongest link</div>
+            </div>
+          </div>
+
+          <div class="divider" style="margin-top:14px;"></div>
+
+          <div class="sec-body" style="margin-top:10px; font-size:11px;">
+            All three r values are <strong>negative</strong> — as SST increases, heatwave days and air temperatures in August tend to <strong>decrease</strong>, the opposite of the hypothesis. None are statistically significant (n=11).
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Conclusion -->
+      <div class="section blue-accent">
+        <div class="sec-label">07 · Conclusion</div>
+        <div class="sec-title">Hypothesis Not Supported — But Warming is Real</div>
+        <div class="sec-body">
+          <p>Local August air temperature spikes and heatwave days in Valencia show <strong>no meaningful positive correlation</strong> with Mediterranean SST anomalies in the same year. The two processes appear to be <strong>independent on an annual timescale</strong>.</p>
+        </div>
+        <div class="conclusion-box">
+          The hottest air year (2010 · 33.8°C) corresponded to only a moderate SST anomaly (+0.34°C) and just 2 heatwave days. The highest SST year (2014 · +0.65°C) recorded a modest air max of 29.9°C and <em>zero</em> heatwave days — the clearest evidence of divergence.
+        </div>
+        <div class="sec-body" style="margin-top:10px;">
+          <p>Yet the <strong>long-term SST trend is undeniable</strong>: +0.94°C from 1870s to 2010s. Mediterranean SST warming is a slow, accumulative process driven by global ocean heat uptake — not directly triggered by individual summer heatwaves.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── RIGHT ─────────────────────────────────────────────── -->
+    <div class="col-right">
+
+      <!-- Decade trend -->
+      <div class="section teal-accent">
+        <div class="sec-label">08 · Long-Term SST Trend</div>
+        <div class="sec-title">Decade Means 1870–2010s</div>
+        <div class="sec-body">SST anomaly averaged per decade. Negative values dominate until the 1990s; crossing into positive territory in the 2000s.</div>
+        <div class="decade-grid">
+          <!-- pre-computed from Python output -->
+          <div class="dg-row"><span class="dg-label">1870s</span><div class="dg-track"><div class="dg-bar" style="width:46%; background:rgba(74,179,240,0.5)"></div></div><span class="dg-val" style="color:var(--sky)">−0.542</span></div>
+          <div class="dg-row"><span class="dg-label">1880s</span><div class="dg-track"><div class="dg-bar" style="width:58%; background:rgba(74,179,240,0.55)"></div></div><span class="dg-val" style="color:var(--sky)">−0.677</span></div>
+          <div class="dg-row"><span class="dg-label">1890s</span><div class="dg-track"><div class="dg-bar" style="width:64%; background:rgba(74,179,240,0.6)"></div></div><span class="dg-val" style="color:var(--sky)">−0.743</span></div>
+          <div class="dg-row"><span class="dg-label">1900s</span><div class="dg-track"><div class="dg-bar" style="width:72%; background:rgba(74,179,240,0.65)"></div></div><span class="dg-val" style="color:var(--sky)">−0.842</span></div>
+          <div class="dg-row"><span class="dg-label">1910s</span><div class="dg-track"><div class="dg-bar" style="width:69%; background:rgba(74,179,240,0.62)"></div></div><span class="dg-val" style="color:var(--sky)">−0.809</span></div>
+          <div class="dg-row"><span class="dg-label">1920s</span><div class="dg-track"><div class="dg-bar" style="width:41%; background:rgba(74,179,240,0.48)"></div></div><span class="dg-val" style="color:var(--sky)">−0.481</span></div>
+          <div class="dg-row"><span class="dg-label">1930s</span><div class="dg-track"><div class="dg-bar" style="width:29%; background:rgba(74,179,240,0.38)"></div></div><span class="dg-val" style="color:var(--sky)">−0.341</span></div>
+          <div class="dg-row"><span class="dg-label">1940s</span><div class="dg-track"><div class="dg-bar" style="width:33%; background:rgba(74,179,240,0.4)"></div></div><span class="dg-val" style="color:var(--sky)">−0.387</span></div>
+          <div class="dg-row"><span class="dg-label">1950s</span><div class="dg-track"><div class="dg-bar" style="width:33%; background:rgba(74,179,240,0.4)"></div></div><span class="dg-val" style="color:var(--sky)">−0.383</span></div>
+          <div class="dg-row"><span class="dg-label">1960s</span><div class="dg-track"><div class="dg-bar" style="width:22%; background:rgba(74,179,240,0.33)"></div></div><span class="dg-val" style="color:var(--sky)">−0.257</span></div>
+          <div class="dg-row"><span class="dg-label">1970s</span><div class="dg-track"><div class="dg-bar" style="width:63%; background:rgba(74,179,240,0.58)"></div></div><span class="dg-val" style="color:var(--sky)">−0.731</span></div>
+          <div class="dg-row"><span class="dg-label">1980s</span><div class="dg-track"><div class="dg-bar" style="width:60%; background:rgba(74,179,240,0.56)"></div></div><span class="dg-val" style="color:var(--sky)">−0.697</span></div>
+          <div class="dg-row"><span class="dg-label">1990s</span><div class="dg-track"><div class="dg-bar" style="width:29%; background:rgba(74,179,240,0.38)"></div></div><span class="dg-val" style="color:var(--sky)">−0.344</span></div>
+          <div class="dg-row"><span class="dg-label">2000s</span><div class="dg-track"><div class="dg-bar" style="width:8%; background:rgba(232,98,26,0.7)"></div></div><span class="dg-val" style="color:var(--orange)">+0.093</span></div>
+          <div class="dg-row"><span class="dg-label">2010s</span><div class="dg-track"><div class="dg-bar" style="width:34%; background:rgba(232,98,26,0.85)"></div></div><span class="dg-val" style="color:var(--orange)">+0.400</span></div>
+        </div>
+      </div>
+
+      <!-- Implications -->
+      <div class="section green-accent">
+        <div class="sec-label">09 · Further Implications</div>
+        <div class="sec-title">Why This Still Matters</div>
+
+        <div class="impl-card">
+          <div class="impl-icon">🌿</div>
+          <div class="impl-text">
+            <strong>Posidonia oceanica at risk</strong>
+            Mediterranean seagrass meadows suffer die-off above 28°C sustained over weeks. SST at +0.65°C already approaches critical thresholds independent of air heatwaves.
+          </div>
+        </div>
+
+        <div class="impl-card">
+          <div class="impl-icon">🐟</div>
+          <div class="impl-text">
+            <strong>Fish population cascades</strong>
+            Marine plants support fish nurseries. Rising baseline SST — even without heatwave coupling — threatens the food web that sustains Valencia's fishing economy.
+          </div>
+        </div>
+
+        <div class="impl-card">
+          <div class="impl-icon">🌍</div>
+          <div class="impl-text">
+            <strong>Mediterranean as early warning</strong>
+            Warming 20% faster than global average means what happens here forecasts future global ocean states. Independent air-sea warming is itself an alarming finding.
+          </div>
+        </div>
+
+        <div class="impl-card">
+          <div class="impl-icon">📊</div>
+          <div class="impl-text">
+            <strong>Methodology can be replicated</strong>
+            The same Python pipeline applied to monthly SST data with monthly air temperature could produce a more conclusive correlation analysis for any coastal city.
+          </div>
+        </div>
+      </div>
+
+      <!-- Interdisciplinary -->
+      <div class="section">
+        <div class="sec-label">10 · Interdisciplinary Roles</div>
+        <div class="sec-title">Group 4 Collaboration</div>
+        <div class="sec-body">
+          <div class="result-item">
+            <div class="ri-icon">💻</div>
+            <div class="ri-text"><strong>Computer Science</strong> Data extraction, cleaning, decade means, Pearson r, HTML dashboard visualisation</div>
+          </div>
+          <div class="result-item">
+            <div class="ri-icon">🌱</div>
+            <div class="ri-text"><strong>ESS</strong> Data interpretation, environmental context, anomaly significance</div>
+          </div>
+          <div class="result-item">
+            <div class="ri-icon">🔬</div>
+            <div class="ri-text"><strong>Biology</strong> Marine plant photosynthesis impacts, ecosystem cascade effects</div>
+          </div>
+          <div class="result-item">
+            <div class="ri-icon">⚗️</div>
+            <div class="ri-text"><strong>Chemistry/Physics</strong> Air contaminant research, thermal properties of seawater</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
   </div>
 
-  <div class="instructions">
-    <strong>To make this QR code work:</strong>
-    <ol>
-      <li>Push <code style="font-family:var(--mono);font-size:11px;color:var(--sky)">valencia_climate_poster.html</code> to your GitHub repo</li>
-      <li>Go to repo <strong>Settings → Pages → Deploy from branch → main</strong></li>
-      <li>Your poster will be live at <strong>alanlopez-cyber.github.io/csp-project/…</strong></li>
-      <li>Paste that URL above and click <strong>Update QR</strong></li>
-    </ol>
-  </div>
+  <!-- ══ FOOTER ════════════════════════════════════════════════ -->
+  <footer class="poster-footer">
+    <div class="footer-sources">
+      <span>Sources: EEA Annual Average Sea Surface Temperature · <a href="https://www.eea.europa.eu">eea.europa.eu</a></span>
+      <span>RVVCCA Valencia Open Data · <a href="https://valencia.opendatasoft.com">valencia.opendatasoft.com</a></span>
+      <span>IPCC AR6 WG2 CCP4 · <a href="https://ipcc.ch">ipcc.ch</a></span>
+    </div>
+    <div style="font-size:11px; color:var(--muted); text-align:center;">
+      Heatwave threshold: ≥ 30°C &nbsp;·&nbsp; Overlap window: 2004–2014 (n=11) &nbsp;·&nbsp; Code: <a href="https://github.com/alanlopez-cyber/csp-project" style="color:var(--sky)">github.com/alanlopez-cyber/csp-project</a>
+    </div>
+    <div class="footer-right">
+      IB Computer Science<br>Group 4 Project
+    </div>
+  </footer>
 
-  <a class="dl-btn" onclick="downloadQR()">⬇ Download QR as PNG</a>
-
-  <div class="team">
-    <strong>Team Members</strong>
-    Alan Lopez Dominguez · Sol Nackowiz<br>
-    Aitana Morzan · Lilou Gebhart · Lucas Garcia Ferrer
-  </div>
 </div>
 
+<!-- ══ CHARTS ════════════════════════════════════════════════ -->
 <script>
-  // default URL
-  let currentURL = "https://alanlopez-cyber.github.io/csp-project/valencia_climate_poster.html";
-  let qr;
+Chart.defaults.color = '#8aaccc';
+Chart.defaults.font.family = "'JetBrains Mono', monospace";
+Chart.defaults.font.size = 10;
+const GC = 'rgba(74,179,240,0.1)';
 
-  function makeQR(url) {
-    document.getElementById('qrcode').innerHTML = '';
-    qr = new QRCode(document.getElementById('qrcode'), {
-      text: url,
-      width: 220,
-      height: 220,
-      colorDark: '#0a0f1e',
-      colorLight: '#ffffff',
-      correctLevel: QRCode.CorrectLevel.H
-    });
+const DATA = {
+  2004:{max:31.2,avg:28.02,hw:4, sst:-0.0505},
+  2005:{max:28.2,avg:26.20,hw:0, sst:-0.1205},
+  2006:{max:29.3,avg:26.66,hw:0, sst: 0.0695},
+  2007:{max:31.3,avg:26.03,hw:1, sst: 0.0995},
+  2008:{max:32.4,avg:27.14,hw:1, sst: 0.1595},
+  2009:{max:28.3,avg:27.37,hw:0, sst: 0.2895},
+  2010:{max:33.8,avg:27.37,hw:2, sst: 0.3395},
+  2011:{max:30.2,avg:27.37,hw:1, sst: 0.2495},
+  2012:{max:30.0,avg:27.33,hw:1, sst: 0.3495},
+  2013:{max:27.6,avg:25.43,hw:0, sst: 0.4095},
+  2014:{max:29.9,avg:26.04,hw:0, sst: 0.6495},
+};
+
+const YRS = [2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014];
+
+function norm(arr) {
+  const mn = Math.min(...arr), mx = Math.max(...arr);
+  return arr.map(v => (v-mn)/(mx-mn));
+}
+
+const sstRaw = YRS.map(y => DATA[y].sst);
+const airRaw = YRS.map(y => DATA[y].max);
+const sN = norm(sstRaw), aN = norm(airRaw);
+
+// SST trend line
+const n = YRS.length, xs = YRS.map((_,i)=>i);
+const slope = (n*xs.reduce((s,x,i)=>s+x*sN[i],0) - xs.reduce((a,b)=>a+b)*sN.reduce((a,b)=>a+b)) /
+              (n*xs.reduce((s,x)=>s+x*x,0) - Math.pow(xs.reduce((a,b)=>a+b),2));
+const intercept = (sN.reduce((a,b)=>a+b) - slope*xs.reduce((a,b)=>a+b)) / n;
+const trend = xs.map(x => +(intercept + slope*x).toFixed(4));
+
+new Chart(document.getElementById('divergeChart'), {
+  type:'line',
+  data:{
+    labels: YRS,
+    datasets:[
+      {
+        label:'SST Anomaly',
+        data: sN.map(v=>+v.toFixed(3)),
+        borderColor:'#4fb3f0', backgroundColor:'rgba(79,179,240,0.07)',
+        borderWidth:2.5, pointRadius:4, pointHoverRadius:7,
+        fill:true, tension:0.4
+      },
+      {
+        label:'SST Trend',
+        data: trend,
+        borderColor:'rgba(79,179,240,0.4)',
+        borderWidth:1.5, borderDash:[5,4],
+        pointRadius:0, fill:false, tension:0
+      },
+      {
+        label:'Max Air Temp',
+        data: aN.map(v=>+v.toFixed(3)),
+        borderColor:'#e8621a', backgroundColor:'rgba(232,98,26,0.05)',
+        borderWidth:2.5,
+        pointRadius: YRS.map(y=>y===2010?6:4),
+        pointBackgroundColor: YRS.map(y=>y===2010?'#ef4444':'#e8621a'),
+        pointHoverRadius:7,
+        fill:true, tension:0.4
+      }
+    ]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    animation:{duration:2000},
+    plugins:{
+      legend:{
+        display:true,
+        labels:{color:'#8aaccc',usePointStyle:true,pointStyleWidth:12,boxHeight:6,padding:16}
+      },
+      tooltip:{
+        backgroundColor:'rgba(10,15,30,0.95)',
+        borderColor:'rgba(79,179,240,0.3)', borderWidth:1,
+        padding:10,
+        callbacks:{
+          label: c => {
+            if (c.dataset.label==='SST Trend') return null;
+            const yr = YRS[c.dataIndex], d = DATA[yr];
+            if (c.dataset.label.includes('SST')) return ` SST Anomaly: ${d.sst.toFixed(4)}°C`;
+            return ` Max Air Temp: ${d.max}°C`;
+          }
+        }
+      }
+    },
+    scales:{
+      x:{grid:{color:GC},ticks:{color:'#8aaccc',font:{size:9}}},
+      y:{
+        grid:{color:GC},
+        ticks:{color:'#8aaccc',font:{size:9},callback:v=>v===0?'Min':v===1?'Max':v.toFixed(1)},
+        title:{display:true,text:'Normalised (0=min, 1=max)',color:'#8aaccc',font:{size:9}},
+        min:-0.08, max:1.12
+      }
+    }
   }
-
-  function updateQR() {
-    const val = document.getElementById('urlInput').value.trim();
-    if (!val) return;
-    currentURL = val;
-    document.getElementById('urlDisplay').textContent = val;
-    makeQR(val);
-  }
-
-  function downloadQR() {
-    const canvas = document.querySelector('#qrcode canvas');
-    if (!canvas) { alert('QR not ready yet — try again in a moment.'); return; }
-
-    // create a larger canvas with label
-    const out = document.createElement('canvas');
-    out.width  = 320;
-    out.height = 380;
-    const ctx = out.getContext('2d');
-
-    // background
-    ctx.fillStyle = '#0a0f1e';
-    ctx.fillRect(0, 0, 320, 380);
-
-    // top accent bar
-    const grad = ctx.createLinearGradient(0, 0, 320, 0);
-    grad.addColorStop(0,    '#e8621a');
-    grad.addColorStop(0.33, '#f4956a');
-    grad.addColorStop(0.66, '#1a7fd4');
-    grad.addColorStop(1,    '#4fb3f0');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, 320, 4);
-
-    // white QR background
-    ctx.fillStyle = '#ffffff';
-    ctx.roundRect(40, 24, 240, 240, 10);
-    ctx.fill();
-
-    // QR code
-    ctx.drawImage(canvas, 50, 34, 220, 220);
-
-    // title
-    ctx.fillStyle = '#f5f0e8';
-    ctx.font = 'bold 14px "DM Sans", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('Valencia Climate Poster', 160, 296);
-
-    ctx.fillStyle = '#8aaccc';
-    ctx.font = '11px "JetBrains Mono", monospace';
-    ctx.fillText('IB Group 4 · CS Project', 160, 316);
-
-    // URL (truncated)
-    ctx.fillStyle = '#4fb3f0';
-    ctx.font = '9px "JetBrains Mono", monospace';
-    const shortURL = currentURL.replace('https://', '').slice(0, 48);
-    ctx.fillText(shortURL, 160, 350);
-
-    // download
-    const link = document.createElement('a');
-    link.download = 'valencia-poster-qr.png';
-    link.href = out.toDataURL('image/png');
-    link.click();
-  }
-
-  // init
-  makeQR(currentURL);
+});
 </script>
 </body>
 </html>
