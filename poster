@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Valencia Climate Poster — QR Code</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink:    #0a0f1e;
+    --deep:   #0d1b35;
+    --blue:   #1a7fd4;
+    --sky:    #4fb3f0;
+    --orange: #e8621a;
+    --peach:  #f4956a;
+    --cream:  #f5f0e8;
+    --muted:  #8aaccc;
+    --serif:  'DM Serif Display', serif;
+    --sans:   'DM Sans', sans-serif;
+    --mono:   'JetBrains Mono', monospace;
+  }
+
+  body {
+    background: var(--ink);
+    font-family: var(--sans);
+    color: var(--cream);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 80%, rgba(14,58,107,0.4) 0%, transparent 70%),
+      radial-gradient(ellipse 60% 60% at 80% 20%, rgba(79,179,240,0.1) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(74,179,240,0.08) 1px, transparent 1px);
+    background-size: 28px 28px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .card {
+    position: relative;
+    z-index: 1;
+    background: rgba(13,27,53,0.85);
+    border: 1px solid rgba(79,179,240,0.2);
+    border-radius: 20px;
+    padding: 44px 48px;
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+    backdrop-filter: blur(12px);
+    box-shadow: 0 0 60px rgba(14,58,107,0.5), 0 0 0 1px rgba(79,179,240,0.08);
+  }
+
+  /* top accent bar */
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--orange), var(--peach), var(--blue), var(--sky));
+    border-radius: 20px 20px 0 0;
+  }
+
+  .badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange);
+    border: 1px solid rgba(232,98,26,0.35);
+    padding: 5px 16px;
+    border-radius: 20px;
+    background: rgba(232,98,26,0.07);
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-size: 22px;
+    line-height: 1.3;
+    color: var(--cream);
+    margin-bottom: 6px;
+  }
+
+  h1 em { color: var(--sky); font-style: italic; }
+
+  .subtitle {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 32px;
+    line-height: 1.5;
+  }
+
+  /* QR container */
+  .qr-frame {
+    display: inline-block;
+    padding: 14px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 0 30px rgba(79,179,240,0.25);
+    margin-bottom: 28px;
+    position: relative;
+  }
+
+  /* corner accents */
+  .qr-frame::before, .qr-frame::after {
+    content: '';
+    position: absolute;
+    width: 20px; height: 20px;
+    border-color: var(--orange);
+    border-style: solid;
+  }
+  .qr-frame::before { top: -1px; left: -1px; border-width: 3px 0 0 3px; border-radius: 4px 0 0 0; }
+  .qr-frame::after  { bottom: -1px; right: -1px; border-width: 0 3px 3px 0; border-radius: 0 0 4px 0; }
+
+  #qrcode { display: block; }
+  #qrcode img, #qrcode canvas { display: block; border-radius: 4px; }
+
+  .url-box {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(79,179,240,0.18);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .url-icon { font-size: 16px; flex-shrink: 0; }
+
+  .url-text {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--sky);
+    word-break: break-all;
+    text-align: left;
+    line-height: 1.5;
+  }
+
+  .url-label {
+    font-size: 10px;
+    color: var(--muted);
+    text-align: left;
+    display: block;
+    margin-bottom: 2px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .instructions {
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 28px;
+    text-align: left;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(79,179,240,0.1);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+
+  .instructions strong { color: var(--cream); }
+
+  .instructions ol { padding-left: 16px; }
+  .instructions li { margin-bottom: 4px; }
+
+  .step-label {
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  /* URL editor */
+  .url-editor {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .url-editor input {
+    flex: 1;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(79,179,240,0.25);
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--cream);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .url-editor input:focus { border-color: var(--sky); }
+  .url-editor input::placeholder { color: var(--muted); }
+
+  .url-editor button {
+    background: var(--blue);
+    border: none;
+    border-radius: 8px;
+    padding: 9px 16px;
+    color: white;
+    font-family: var(--mono);
+    font-size: 11px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    white-space: nowrap;
+  }
+
+  .url-editor button:hover  { background: var(--sky); }
+  .url-editor button:active { transform: scale(0.97); }
+
+  .team {
+    font-size: 11px;
+    color: rgba(138,172,204,0.5);
+    font-family: var(--mono);
+    line-height: 1.7;
+  }
+
+  .team strong { color: var(--muted); display: block; margin-bottom: 2px; }
+
+  /* download btn */
+  .dl-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(232,98,26,0.12);
+    border: 1px solid rgba(232,98,26,0.35);
+    color: var(--peach);
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 10px 20px;
+    border-radius: 9px;
+    cursor: pointer;
+    margin-bottom: 28px;
+    transition: background 0.2s;
+    text-decoration: none;
+  }
+
+  .dl-btn:hover { background: rgba(232,98,26,0.22); }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="badge">IB Group 4 Project</div>
+
+  <h1>Valencia Climate Poster<br><em>Scan to View</em></h1>
+  <p class="subtitle">Mediterranean SST vs August Air Temperature · 2004–2014</p>
+
+  <div class="qr-frame">
+    <div id="qrcode"></div>
+  </div>
+
+  <br>
+
+  <span class="step-label">🔗 Pointing to</span>
+  <div class="url-box">
+    <span class="url-icon">🌐</span>
+    <div>
+      <span class="url-label">Current URL</span>
+      <div class="url-text" id="urlDisplay">https://alanlopez-cyber.github.io/csp-project/valencia_climate_poster.html</div>
+    </div>
+  </div>
+
+  <span class="step-label">✏️ Update URL once poster is hosted</span>
+  <div class="url-editor">
+    <input type="text" id="urlInput" placeholder="Paste your hosted URL here…" value="https://alanlopez-cyber.github.io/csp-project/valencia_climate_poster.html">
+    <button onclick="updateQR()">Update QR</button>
+  </div>
+
+  <div class="instructions">
+    <strong>To make this QR code work:</strong>
+    <ol>
+      <li>Push <code style="font-family:var(--mono);font-size:11px;color:var(--sky)">valencia_climate_poster.html</code> to your GitHub repo</li>
+      <li>Go to repo <strong>Settings → Pages → Deploy from branch → main</strong></li>
+      <li>Your poster will be live at <strong>alanlopez-cyber.github.io/csp-project/…</strong></li>
+      <li>Paste that URL above and click <strong>Update QR</strong></li>
+    </ol>
+  </div>
+
+  <a class="dl-btn" onclick="downloadQR()">⬇ Download QR as PNG</a>
+
+  <div class="team">
+    <strong>Team Members</strong>
+    Alan Lopez Dominguez · Sol Nackowiz<br>
+    Aitana Morzan · Lilou Gebhart · Lucas Garcia Ferrer
+  </div>
+</div>
+
+<script>
+  // default URL
+  let currentURL = "https://alanlopez-cyber.github.io/csp-project/valencia_climate_poster.html";
+  let qr;
+
+  function makeQR(url) {
+    document.getElementById('qrcode').innerHTML = '';
+    qr = new QRCode(document.getElementById('qrcode'), {
+      text: url,
+      width: 220,
+      height: 220,
+      colorDark: '#0a0f1e',
+      colorLight: '#ffffff',
+      correctLevel: QRCode.CorrectLevel.H
+    });
+  }
+
+  function updateQR() {
+    const val = document.getElementById('urlInput').value.trim();
+    if (!val) return;
+    currentURL = val;
+    document.getElementById('urlDisplay').textContent = val;
+    makeQR(val);
+  }
+
+  function downloadQR() {
+    const canvas = document.querySelector('#qrcode canvas');
+    if (!canvas) { alert('QR not ready yet — try again in a moment.'); return; }
+
+    // create a larger canvas with label
+    const out = document.createElement('canvas');
+    out.width  = 320;
+    out.height = 380;
+    const ctx = out.getContext('2d');
+
+    // background
+    ctx.fillStyle = '#0a0f1e';
+    ctx.fillRect(0, 0, 320, 380);
+
+    // top accent bar
+    const grad = ctx.createLinearGradient(0, 0, 320, 0);
+    grad.addColorStop(0,    '#e8621a');
+    grad.addColorStop(0.33, '#f4956a');
+    grad.addColorStop(0.66, '#1a7fd4');
+    grad.addColorStop(1,    '#4fb3f0');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, 320, 4);
+
+    // white QR background
+    ctx.fillStyle = '#ffffff';
+    ctx.roundRect(40, 24, 240, 240, 10);
+    ctx.fill();
+
+    // QR code
+    ctx.drawImage(canvas, 50, 34, 220, 220);
+
+    // title
+    ctx.fillStyle = '#f5f0e8';
+    ctx.font = 'bold 14px "DM Sans", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Valencia Climate Poster', 160, 296);
+
+    ctx.fillStyle = '#8aaccc';
+    ctx.font = '11px "JetBrains Mono", monospace';
+    ctx.fillText('IB Group 4 · CS Project', 160, 316);
+
+    // URL (truncated)
+    ctx.fillStyle = '#4fb3f0';
+    ctx.font = '9px "JetBrains Mono", monospace';
+    const shortURL = currentURL.replace('https://', '').slice(0, 48);
+    ctx.fillText(shortURL, 160, 350);
+
+    // download
+    const link = document.createElement('a');
+    link.download = 'valencia-poster-qr.png';
+    link.href = out.toDataURL('image/png');
+    link.click();
+  }
+
+  // init
+  makeQR(currentURL);
+</script>
+</body>
+</html>
